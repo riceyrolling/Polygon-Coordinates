@@ -20,6 +20,10 @@ userShape = {
     color: '#f00'       //shape line color
 };
 
+roiShape = {
+    points: []
+}
+
 ////////////////////////////
 //Canvas
 ///////////////////////////
@@ -75,11 +79,8 @@ canvas.addEventListener('click', function(){
 //coordinate tool button
 document.getElementById('coord-tool').addEventListener('click', function(){
     var result = ''+userShape.points.length+'<br>';//outputed to user
-    //loop through each point
-    for(i=0; i < userShape.points.length ; i++){
-        //save each point
-        result+= Math.trunc(userShape.points[i].x) + ' ' + Math.trunc(userShape.points[i].y) + '<br>';
-    }
+    //save each point
+    result+= JSON.stringify(roiShape.points).replace(/['"]+/g, '')
     //Insert result to html overlay
     console.log(result);
     document.getElementById('shape-coordinates-result').innerHTML = result;//add result to overlay
@@ -161,12 +162,12 @@ function drawToolLogic(canvasClicked){
                         x: mouse.x * (originalMediaWidth/canvas.width),
                         y: mouse.y * (originalMediaHeight/canvas.height)
                     });
+                    roiShape.points.push([(mouse.x/canvas.width).toFixed(4),(mouse.y/canvas.height).toFixed(4)])
                 }
                 //add point normally
                 else
                     userShape.points.push({x:mouse.x,y:mouse.y});//add new shape point
             }
-            console.log(userShape.points);//log new shape array
         }
 
         //if over first shape point and ready to close shape
@@ -174,6 +175,7 @@ function drawToolLogic(canvasClicked){
             console.log('over finisher point');
             drawCircle(userShape.points[0].x*(canvas.width/originalMediaWidth), userShape.points[0].y*(canvas.height/originalMediaHeight), 7, 2, '#00ff00', 'fill');
             drawCircle(userShape.points[0].x*(canvas.width/originalMediaWidth), userShape.points[0].y*(canvas.height/originalMediaHeight), 8, 2, '#fff', 'stroke');
+            console.log(JSON.stringify(roiShape.points).replace(/['"]+/g, ''))
         }
 
         //preview next shape line
@@ -190,6 +192,7 @@ function deleteToolLogic(canvasClicked){
         //if user wants to edit point being focused
         if(focusedPoint !== undefined && canvasClicked){
             userShape.points.splice(focusedPoint, 1);//delete selected point
+            roiShape.points.splice(focusedPoint, 1);//delete selected point
             //if shape is not fully connected
             if(userShape.finished && userShape.points.length < 3)
                 userShape.finished = false;//set shape as unfinished
