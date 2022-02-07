@@ -1,0 +1,20 @@
+{
+  "name": "roi-tool",
+  "version": "1.0.0",
+  "description": "<img src=\"https://github.com/Hermitter/Polygon-Overlay/blob/master/images/demo.gif?raw=true\">\r <p>Link: https://hermitter.github.io/Polygon-Coordinates/</p>",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/riceyrolling/Polygon-Coordinates.git"
+  },
+  "author": "Caleb Rocca <caleb.rocca@sensen.ai>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/riceyrolling/Polygon-Coordinates/issues"
+  },
+  "homepage": "https://github.com/riceyrolling/Polygon-Coordinates#readme"
+}
