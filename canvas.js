@@ -32,6 +32,7 @@ function animate(){
     //remove previous polygon
     if(newMedia){
         userShape.points = [];//reset user points
+        roiShape.points = [];
         userShape.finished = false;
         newMedia = false;
     }
@@ -57,6 +58,8 @@ createActiveTool('draw-points-tool', 'crosshair');
 //delete tool button click event
 createActiveTool('delete-points-tool', 'not-allowed');
 
+createActiveTool('delete-all-points', 'not-allowed');
+
 //On Cavnas Mouse Move
 canvas.addEventListener('mousemove', function (event) {
     var rect = canvas.getBoundingClientRect();//canvas dimensions
@@ -78,11 +81,9 @@ canvas.addEventListener('click', function(){
 
 //coordinate tool button
 document.getElementById('coord-tool').addEventListener('click', function(){
-    var result = ''+userShape.points.length+'<br>';//outputed to user
     //save each point
-    result+= JSON.stringify(roiShape.points).replace(/['"]+/g, '')
+    var result = JSON.stringify(roiShape.points).replace(/['"]+/g, '')
     //Insert result to html overlay
-    console.log(result);
     document.getElementById('shape-coordinates-result').innerHTML = result;//add result to overlay
     showPopup('shape-coordinates-overlay');//show overlay
 });
@@ -97,6 +98,7 @@ document.addEventListener("keydown", function (event) {
         //remove last point
         else{
             userShape.points.pop();
+            roiShape.points.pop();
             console.log(userShape);
         }
     }
@@ -105,6 +107,16 @@ document.addEventListener("keydown", function (event) {
 ////////////////////////////
 //Functions
 ///////////////////////////
+function convertRoiShape(){
+    roiShape.points = JSON.parse(document.getElementById("shape-coordinates-result").innerHTML)
+    userShape.points = []
+    roiShape.points.forEach(pair => {
+        userShape.points.push({x: pair[0]*originalMediaWidth, y: pair[1]*originalMediaHeight});
+    });
+    userShape.finished = true;
+    hidePopup('shape-coordinates-overlay')
+}
+
 // - Runs function for tool in use
 function activeToolLogic(){
     if(activeTool === 'none'){
@@ -119,8 +131,20 @@ function activeToolLogic(){
     }
     else if (activeTool === 'delete-points-tool'){
         deleteToolLogic(mouse.clickedCanvas);
+    } else if (activeTool === 'delete-all-points'){
+        deleteAllLogic()
     }
     mouse.clickedCanvas = false;//set mouse as unclicked
+}
+
+// - Logic for delete all points button
+function deleteAllLogic(){
+    userShape.points = [];
+    roiShape.points= [];
+    //cancel finished shape
+    if(userShape.finished)
+        userShape.finished = false;
+    document.getElementById('delete-all-points').click()
 }
 
 // - Adds button click event & cursor change & sets active tool
@@ -156,13 +180,13 @@ function drawToolLogic(canvasClicked){
                 userShape.finished = true;
             //user wants to add a point
             else{
+                roiShape.points.push([(mouse.x/canvas.width).toFixed(4),(mouse.y/canvas.height).toFixed(4)])
                 //adjust if media resize
                 if(mediaIsShrunk){
                     userShape.points.push({
                         x: mouse.x * (originalMediaWidth/canvas.width),
                         y: mouse.y * (originalMediaHeight/canvas.height)
                     });
-                    roiShape.points.push([(mouse.x/canvas.width).toFixed(4),(mouse.y/canvas.height).toFixed(4)])
                 }
                 //add point normally
                 else
@@ -172,10 +196,8 @@ function drawToolLogic(canvasClicked){
 
         //if over first shape point and ready to close shape
         if(userShape.points.length > 1 && mouseOnPoint(userShape.points[0])){
-            console.log('over finisher point');
             drawCircle(userShape.points[0].x*(canvas.width/originalMediaWidth), userShape.points[0].y*(canvas.height/originalMediaHeight), 7, 2, '#00ff00', 'fill');
             drawCircle(userShape.points[0].x*(canvas.width/originalMediaWidth), userShape.points[0].y*(canvas.height/originalMediaHeight), 8, 2, '#fff', 'stroke');
-            console.log(JSON.stringify(roiShape.points).replace(/['"]+/g, ''))
         }
 
         //preview next shape line
@@ -219,6 +241,8 @@ function moveToolLogic(canvasClicked){
     if(editingPoint !== undefined){
         userShape.points[editingPoint].x = mouse.x*(originalMediaWidth/canvas.width);//set point x to mouse.x
         userShape.points[editingPoint].y = mouse.y*(originalMediaHeight/canvas.height);//set point y to mouse.y
+        roiShape.points[editingPoint][0] = (mouse.x/canvas.width).toFixed(4);
+        roiShape.points[editingPoint][1] = (mouse.y/canvas.height).toFixed(4);
     }
 }
 

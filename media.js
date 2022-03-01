@@ -149,11 +149,22 @@ function setUrlMedia(){
     newMedia = true;//new media was imported
     var url = document.getElementById('url-input-field').value;//input field value
     var fileType = url.split(/\#|\?/)[0].split('.').pop().trim().toLowerCase();//.jpg,.mp4,etc...
-    console.log('Uploaded: '+fileType);//log file type
+    console.log('Uploadedd: '+fileType);//log file type
     //if html supported video
     if (fileType === 'mp4' || fileType === 'webm' || fileType === 'ogg'){
         media.innerHTML = '<video id="user-media" muted autoplay loop src="'+url+'">';//add video to html
         fileType = 'video';//declare file as a video
+    } else if (fileType === 'm3u8'){
+        media.innerHTML = '<video id="user-media" muted autoplay loop>';//add empty video to html
+        var video = document.getElementById("user-media")
+        fileType = 'video';//declare file as a video
+        if (Hls.isSupported()) {
+            var hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(video);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = url;
+        }
     }
     //else assume it's an image file
     else{
